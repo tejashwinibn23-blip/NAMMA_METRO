@@ -1,31 +1,35 @@
 const express = require("express");
-const connectDB  = require("../config/database");
+const { connectDB } = require("../config/database");
+const User = require("../models/user");
+
 const app = express();
 const port = 3000;
-const User = require("../models/user");
+
+app.use(express.json()); // for parsing JSON bodies
 
 app.post("/user", async (req, res) => {
   try {
-    const userObj = new User({
-      firstName: "tejahswini",
-      lastName: "bn",
-      Email: "mail2tejubn06@gmail.com",
-      Phone: "9008305774",
-    });
+    const userObj = new User(req.body);
     await userObj.save();
-    res.send("user data stored successfully");
+    res.send("User data stored successfully");
   } catch (err) {
-    console.log(err);
+    console.error(err);
+    res.status(500).send("Error saving user");
   }
 });
+
 app.get("/user", async (req, res) => {
-  const users = await User.find({});
-  res.status(200).json(users);
+  try {
+    const users = await User.find({});
+    res.status(200).json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching users");
+  }
 });
 
 connectDB().then(() => {
-  console.log("connection established successfully");
   app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+    console.log(`🚀 Server running at http://localhost:${port}`);
   });
 });
